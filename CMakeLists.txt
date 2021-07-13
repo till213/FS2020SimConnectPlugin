@@ -13,6 +13,7 @@ endif()
 target_sources(${PLUGIN_NAME}
     PRIVATE
         README.md
+        src/SimConnectAI.h
 #        src/PathCreatorPlugin.cpp
 #        src/PathCreatorPlugin.h
 #        src/PathCreatorPlugin.json
