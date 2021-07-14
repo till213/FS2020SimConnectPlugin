@@ -18,6 +18,7 @@ target_sources(${PLUGIN_NAME}
     PRIVATE
         src/FS2020SimConnectPlugin.cpp
         src/FS2020SimConnectPlugin.h
+        src/FS2020SimConnectPlugin.json
         src/SimConnectType.h
         src/SimConnectPosition.cpp
         src/SimConnectPosition.h

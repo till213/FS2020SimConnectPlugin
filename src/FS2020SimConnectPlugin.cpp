@@ -138,12 +138,18 @@ FS2020SimConnectPlugin::FS2020SimConnectPlugin(QObject *parent) noexcept
       d(std::make_unique<SkyConnectPrivate>())
 {
     frenchConnection();
+#ifdef DEBUG
+    qDebug("FS2020SimConnectPlugin::FS2020SimConnectPlugin: CREATED");
+#endif
 }
 
 FS2020SimConnectPlugin::~FS2020SimConnectPlugin() noexcept
 {
     setAircraftFrozen(::SIMCONNECT_OBJECT_ID_USER, false);
     close();
+#ifdef DEBUG
+    qDebug("FS2020SimConnectPlugin::~FS2020SimConnectPlugin: DELETED");
+#endif
 }
 
 // PROTECTED
