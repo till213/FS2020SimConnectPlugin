@@ -22,8 +22,8 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifndef SKYCONNECTIMPL_H
-#define SKYCONNECTIMPL_H
+#ifndef FS2020SIMCONNNECTPLUGIN_H
+#define FS2020SIMCONNNECTPLUGIN_H
 #include <memory>
 
 #include <QObject>
@@ -40,14 +40,14 @@ struct PositionData;
 class Aircraft;
 class SkyConnectPrivate;
 
-class SkyConnectImpl : public AbstractSkyConnect
+class FS2020SimConnectPlugin : public AbstractSkyConnect
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID SKYCONNECT_INTERFACE_IID FILE "FS2020SimConnectPlugin.json")
     Q_INTERFACES(SkyConnectIntf)
 public:
-    SkyConnectImpl(QObject *parent = nullptr) noexcept;
-    virtual ~SkyConnectImpl() noexcept;
+    FS2020SimConnectPlugin(QObject *parent = nullptr) noexcept;
+    virtual ~FS2020SimConnectPlugin() noexcept;
 
 protected:
     virtual bool isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept override;
@@ -101,4 +101,4 @@ private slots:
     void processSimConnectEvent() noexcept;
 };
 
-#endif // SKYCONNECTIMPL_H
+#endif // FS2020SIMCONNNECTPLUGIN_H

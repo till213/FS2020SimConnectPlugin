@@ -16,8 +16,8 @@ find_package(SimConnect REQUIRED)
 
 target_sources(${PLUGIN_NAME}
     PRIVATE
-        src/SkyConnectImpl.cpp
-        src/SkyConnectImpl.h
+        src/FS2020SimConnectPlugin.cpp
+        src/FS2020SimConnectPlugin.h
         src/SimConnectType.h
         src/SimConnectPosition.cpp
         src/SimConnectPosition.h

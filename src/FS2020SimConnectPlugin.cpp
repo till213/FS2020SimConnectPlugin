@@ -70,7 +70,7 @@
 #include "SimConnectSimulationTime.h"
 #include "SimConnectAI.h"
 #include "EventWidget.h"
-#include "SkyConnectImpl.h"
+#include "FS2020SimConnectPlugin.h"
 
 namespace
 {
@@ -133,14 +133,14 @@ public:
 
 // PUBLIC
 
-SkyConnectImpl::SkyConnectImpl(QObject *parent) noexcept
+FS2020SimConnectPlugin::FS2020SimConnectPlugin(QObject *parent) noexcept
     : AbstractSkyConnect(parent),
       d(std::make_unique<SkyConnectPrivate>())
 {
     frenchConnection();
 }
 
-SkyConnectImpl::~SkyConnectImpl() noexcept
+FS2020SimConnectPlugin::~FS2020SimConnectPlugin() noexcept
 {
     setAircraftFrozen(::SIMCONNECT_OBJECT_ID_USER, false);
     close();
@@ -148,20 +148,20 @@ SkyConnectImpl::~SkyConnectImpl() noexcept
 
 // PROTECTED
 
-bool SkyConnectImpl::isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept
+bool FS2020SimConnectPlugin::isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept
 {
     // "Auto" and 1 Hz sample rates are processed event-based
     return sampleRate != SampleRate::SampleRate::Auto && sampleRate != SampleRate::SampleRate::Hz1;
 }
 
-bool SkyConnectImpl::onUserAircraftManualControl(bool enable) noexcept
+bool FS2020SimConnectPlugin::onUserAircraftManualControl(bool enable) noexcept
 {
     // "Freeze" or "unfreeze" depending on whether the user aircraft is to be manually flown
     setAircraftFrozen(::SIMCONNECT_OBJECT_ID_USER, !enable);
     return true;
 }
 
-bool SkyConnectImpl::onStartRecording(const InitialPosition &initialPosition) noexcept
+bool FS2020SimConnectPlugin::onStartRecording(const InitialPosition &initialPosition) noexcept
 {
     resetCurrentData();
 
@@ -187,13 +187,13 @@ bool SkyConnectImpl::onStartRecording(const InitialPosition &initialPosition) no
     return ok;
 }
 
-void SkyConnectImpl::onRecordingPaused(bool paused) noexcept
+void FS2020SimConnectPlugin::onRecordingPaused(bool paused) noexcept
 {
     Q_UNUSED(paused)
     updateRecordingFrequency(Settings::getInstance().getRecordingSampleRate());
 }
 
-void SkyConnectImpl::onStopRecording() noexcept
+void FS2020SimConnectPlugin::onStopRecording() noexcept
 {
     // Stop receiving "frame" events
     ::SimConnect_UnsubscribeFromSystemEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::Frame));
@@ -248,7 +248,7 @@ void SkyConnectImpl::onStopRecording() noexcept
     flight.setFlightCondition(condition);
 }
 
-bool SkyConnectImpl::onStartReplay(qint64 currentTimestamp) noexcept
+bool FS2020SimConnectPlugin::onStartReplay(qint64 currentTimestamp) noexcept
 {
     d->engineState = EngineState::Unknown;
     // "Freeze" the simulation: position and attitude only set by (interpolated) sample points
@@ -262,7 +262,7 @@ bool SkyConnectImpl::onStartReplay(qint64 currentTimestamp) noexcept
     return result == S_OK;
 }
 
-void SkyConnectImpl::onReplayPaused(bool paused) noexcept
+void FS2020SimConnectPlugin::onReplayPaused(bool paused) noexcept
 {
     if (paused) {
         ::SimConnect_UnsubscribeFromSystemEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::Frame));
@@ -271,13 +271,13 @@ void SkyConnectImpl::onReplayPaused(bool paused) noexcept
     }
 }
 
-void SkyConnectImpl::onStopReplay() noexcept
+void FS2020SimConnectPlugin::onStopReplay() noexcept
 {
     ::SimConnect_UnsubscribeFromSystemEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::Frame));
     setAircraftFrozen(::SIMCONNECT_OBJECT_ID_USER, false);
 }
 
-void SkyConnectImpl::onSeek(qint64 currentTimestamp) noexcept
+void FS2020SimConnectPlugin::onSeek(qint64 currentTimestamp) noexcept
 {
     d->engineState = EngineState::Unknown;
     if (currentTimestamp == 0) {
@@ -288,12 +288,12 @@ void SkyConnectImpl::onSeek(qint64 currentTimestamp) noexcept
     }
 };
 
-void SkyConnectImpl::onRecordingSampleRateChanged(SampleRate::SampleRate sampleRate) noexcept
+void FS2020SimConnectPlugin::onRecordingSampleRateChanged(SampleRate::SampleRate sampleRate) noexcept
 {
      updateRecordingFrequency(sampleRate);
 }
 
-bool SkyConnectImpl::sendAircraftData(qint64 currentTimestamp, TimeVariableData::Access access, AircraftSelection aircraftSelection) noexcept
+bool FS2020SimConnectPlugin::sendAircraftData(qint64 currentTimestamp, TimeVariableData::Access access, AircraftSelection aircraftSelection) noexcept
 {
     bool ok;
     const Flight &flight = getCurrentFlight();
@@ -411,7 +411,7 @@ bool SkyConnectImpl::sendAircraftData(qint64 currentTimestamp, TimeVariableData:
     return ok;
 }
 
-inline bool SkyConnectImpl::updateAndSendEngineStartEvent(qint64 objectId, const EngineData &engineData, TimeVariableData::Access access) noexcept
+inline bool FS2020SimConnectPlugin::updateAndSendEngineStartEvent(qint64 objectId, const EngineData &engineData, TimeVariableData::Access access) noexcept
 {
     HRESULT res = S_OK;
 
@@ -490,12 +490,12 @@ inline bool SkyConnectImpl::updateAndSendEngineStartEvent(qint64 objectId, const
     return res == S_OK;
 }
 
-bool SkyConnectImpl::isConnectedWithSim() const noexcept
+bool FS2020SimConnectPlugin::isConnectedWithSim() const noexcept
 {
     return d->simConnectHandle != nullptr;
 }
 
-bool SkyConnectImpl::connectWithSim() noexcept
+bool FS2020SimConnectPlugin::connectWithSim() noexcept
 {
     HWND hWnd = reinterpret_cast<HWND>(d->eventWidget->winId());
     DWORD userEvent = EventWidget::SimConnnectUserMessage;
@@ -514,18 +514,18 @@ bool SkyConnectImpl::connectWithSim() noexcept
     return ok;
 }
 
-bool SkyConnectImpl::onCreateAIObjects() noexcept
+bool FS2020SimConnectPlugin::onCreateAIObjects() noexcept
 {
     return d->simConnectAI->createSimulatedAircrafts(getCurrentFlight(), d->pendingAIAircraftCreationRequests);
 }
 
-void SkyConnectImpl::onDestroyAIObjects() noexcept
+void FS2020SimConnectPlugin::onDestroyAIObjects() noexcept
 {
     d->pendingAIAircraftCreationRequests.clear();
     d->simConnectAI->destroySimulatedAircrafts(getCurrentFlight());
 }
 
-void SkyConnectImpl::onDestroyAIObject(Aircraft &aircraft) noexcept
+void FS2020SimConnectPlugin::onDestroyAIObject(Aircraft &aircraft) noexcept
 {
     if (aircraft.getSimulationObjectId() != ::SIMCONNECT_OBJECT_ID_USER) {
         d->simConnectAI->destroySimulatedAircraft(aircraft);
@@ -534,7 +534,7 @@ void SkyConnectImpl::onDestroyAIObject(Aircraft &aircraft) noexcept
 
 // PROTECTED SLOTS
 
-void SkyConnectImpl::recordData() noexcept
+void FS2020SimConnectPlugin::recordData() noexcept
 {
     Aircraft &userAircraft = getCurrentFlight().getUserAircraft();
     bool dataStored = false;
@@ -585,13 +585,13 @@ void SkyConnectImpl::recordData() noexcept
 
 // PRIVATE
 
-void SkyConnectImpl::frenchConnection() noexcept
+void FS2020SimConnectPlugin::frenchConnection() noexcept
 {
     connect(d->eventWidget.get(), &EventWidget::simConnectEvent,
-            this, &SkyConnectImpl::processSimConnectEvent);
+            this, &FS2020SimConnectPlugin::processSimConnectEvent);
 }
 
-void SkyConnectImpl::resetCurrentData() noexcept
+void FS2020SimConnectPlugin::resetCurrentData() noexcept
 {
     d->currentPositionData = PositionData::NullData;
     d->currentEngineData = EngineData::NullData;
@@ -601,7 +601,7 @@ void SkyConnectImpl::resetCurrentData() noexcept
     d->currentLightData = LightData::NullData;
 }
 
-bool SkyConnectImpl::reconnectWithSim() noexcept
+bool FS2020SimConnectPlugin::reconnectWithSim() noexcept
 {
     bool res;
     if (close()) {
@@ -612,7 +612,7 @@ bool SkyConnectImpl::reconnectWithSim() noexcept
     return res;
 }
 
-bool SkyConnectImpl::close() noexcept
+bool FS2020SimConnectPlugin::close() noexcept
 {
     HRESULT result;
 
@@ -625,7 +625,7 @@ bool SkyConnectImpl::close() noexcept
     return result == S_OK;
 }
 
-void SkyConnectImpl::setupRequestData() noexcept
+void FS2020SimConnectPlugin::setupRequestData() noexcept
 {
     // Request data
     SimConnectAircraftInfo::addToDataDefinition(d->simConnectHandle);
@@ -656,7 +656,7 @@ void SkyConnectImpl::setupRequestData() noexcept
 
 }
 
-bool SkyConnectImpl::setupInitialRecordingPosition(const InitialPosition &initialPosition) noexcept
+bool FS2020SimConnectPlugin::setupInitialRecordingPosition(const InitialPosition &initialPosition) noexcept
 {
     bool ok;
     if (!initialPosition.isNull()) {
@@ -671,7 +671,7 @@ bool SkyConnectImpl::setupInitialRecordingPosition(const InitialPosition &initia
     return ok;
 }
 
-void SkyConnectImpl::setupInitialReplayPosition() noexcept
+void FS2020SimConnectPlugin::setupInitialReplayPosition() noexcept
 {
     const Aircraft &userAircraft = getCurrentFlight().getUserAircraftConst();
     const PositionData &positionData = userAircraft.getPositionConst().getFirst();
@@ -686,7 +686,7 @@ void SkyConnectImpl::setupInitialReplayPosition() noexcept
     }
 }
 
-void SkyConnectImpl::setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept
+void FS2020SimConnectPlugin::setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept
 {
     DWORD data;
     if (objectId == ::SIMCONNECT_OBJECT_ID_USER && isUserAircraftManualControl()) {
@@ -700,7 +700,7 @@ void SkyConnectImpl::setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool ena
     ::SimConnect_TransmitClientEvent(d->simConnectHandle, objectId, Enum::toUnderlyingType(Event::FreezeAttitude), data, ::SIMCONNECT_GROUP_PRIORITY_HIGHEST, ::SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
 }
 
-void SkyConnectImpl::replay() noexcept
+void FS2020SimConnectPlugin::replay() noexcept
 {
     const qint64 currentTimestamp = getCurrentTimestamp();
     if (currentTimestamp <= getCurrentFlight().getTotalDurationMSec()) {
@@ -714,7 +714,7 @@ void SkyConnectImpl::replay() noexcept
     }
 }
 
-void SkyConnectImpl::updateRecordingFrequency(SampleRate::SampleRate sampleRate) noexcept
+void FS2020SimConnectPlugin::updateRecordingFrequency(SampleRate::SampleRate sampleRate) noexcept
 {
     if (getState() == Connect::State::Recording) {
         switch (sampleRate) {
@@ -744,7 +744,7 @@ void SkyConnectImpl::updateRecordingFrequency(SampleRate::SampleRate sampleRate)
     }
 }
 
-void SkyConnectImpl::updateRequestPeriod(::SIMCONNECT_PERIOD period) noexcept
+void FS2020SimConnectPlugin::updateRequestPeriod(::SIMCONNECT_PERIOD period) noexcept
 {
     if (d->currentRequestPeriod != period) {
         ::SimConnect_RequestDataOnSimObject(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataRequest::AircraftPosition), Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftPositionDefinition),
@@ -769,11 +769,11 @@ void SkyConnectImpl::updateRequestPeriod(::SIMCONNECT_PERIOD period) noexcept
     }
 }
 
-void CALLBACK SkyConnectImpl::dispatch(::SIMCONNECT_RECV *receivedData, DWORD cbData, void *context) noexcept
+void CALLBACK FS2020SimConnectPlugin::dispatch(::SIMCONNECT_RECV *receivedData, DWORD cbData, void *context) noexcept
 {
     Q_UNUSED(cbData);
 
-    SkyConnectImpl *skyConnect = static_cast<SkyConnectImpl *>(context);
+    FS2020SimConnectPlugin *skyConnect = static_cast<FS2020SimConnectPlugin *>(context);
     Flight &flight = skyConnect->getCurrentFlight();
     Aircraft &userAircraft = flight.getUserAircraft();
     ::SIMCONNECT_RECV_SIMOBJECT_DATA *objectData;
@@ -1081,9 +1081,9 @@ void CALLBACK SkyConnectImpl::dispatch(::SIMCONNECT_RECV *receivedData, DWORD cb
 
 // PRIVATE SLOTS
 
-void SkyConnectImpl::processSimConnectEvent() noexcept
+void FS2020SimConnectPlugin::processSimConnectEvent() noexcept
 {
     updateCurrentTimestamp();
     // Process system events
-    ::SimConnect_CallDispatch(d->simConnectHandle, SkyConnectImpl::dispatch, this);
+    ::SimConnect_CallDispatch(d->simConnectHandle, FS2020SimConnectPlugin::dispatch, this);
 }
