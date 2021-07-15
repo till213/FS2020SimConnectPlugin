@@ -52,11 +52,11 @@ add_custom_command(TARGET ${PLUGIN_NAME} POST_BUILD
         $<TARGET_FILE:SimConnect>
         $<TARGET_FILE_DIR:${PLUGIN_NAME}>/../../)
 
-set(PLUGIN_LIBS
+set(PLUGIN_DEPENDENCIES
     Qt${QT_VERSION_MAJOR}::Widgets Kernel Model SkyConnect tsl::ordered_map SimConnect
 )
 
-target_link_libraries(${PLUGIN_NAME} PRIVATE ${PLUGIN_LIBS})
+target_link_libraries(${PLUGIN_NAME} PRIVATE ${PLUGIN_DEPENDENCIES})
 
 target_include_directories(${PLUGIN_NAME} PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}"
