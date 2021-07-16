@@ -430,14 +430,14 @@ inline bool FS2020SimConnectPlugin::updateAndSendEngineStartEvent(qint64 objectI
         if (engineData.hasCombustion()) {
             d->engineState = EngineState::Started;
 #ifdef DEBUG
-            qDebug("SkyConnectImpl::updateAndSendEngineState: STARTING -> ENGINE STARTED");
+            qDebug("SkyConnectImpl::updateAndSendEngineState: aircraft ID: %lld: STARTING -> ENGINE STARTED", objectId);
 #endif
         } else if (!engineData.hasEngineStarterEnabled()) {
              // STARTING: Engine started disabled, no combustion -> STOPPED
             res = ::SimConnect_TransmitClientEvent(d->simConnectHandle, objectId, Enum::toUnderlyingType(Event::EngineAutoShutdown), 0, ::SIMCONNECT_GROUP_PRIORITY_HIGHEST, ::SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
             d->engineState = EngineState::Stopped;
 #ifdef DEBUG
-            qDebug("SkyConnectImpl::updateAndSendEngineState: STARTING -> ENGINE STOPPED");
+            qDebug("SkyConnectImpl::updateAndSendEngineState: aircraft ID: %lld STARTING -> ENGINE STOPPED", objectId);
 #endif
         }
         break;
@@ -447,7 +447,7 @@ inline bool FS2020SimConnectPlugin::updateAndSendEngineStartEvent(qint64 objectI
             res = ::SimConnect_TransmitClientEvent(d->simConnectHandle, objectId, Enum::toUnderlyingType(Event::EngineAutoShutdown), 0, ::SIMCONNECT_GROUP_PRIORITY_HIGHEST, ::SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
             d->engineState = EngineState::Stopped;
 #ifdef DEBUG
-            qDebug("SkyConnectImpl::updateAndSendEngineState: STARTED -> ENGINE STOPPED");
+            qDebug("SkyConnectImpl::updateAndSendEngineState: aircraft ID: %lld STARTED -> ENGINE STOPPED", objectId);
 #endif
         }
         break;
@@ -459,7 +459,7 @@ inline bool FS2020SimConnectPlugin::updateAndSendEngineStartEvent(qint64 objectI
             res = ::SimConnect_TransmitClientEvent(d->simConnectHandle, objectId, Enum::toUnderlyingType(Event::EngineAutoStart), 0, ::SIMCONNECT_GROUP_PRIORITY_HIGHEST, ::SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY);
             d->engineState = EngineState::Starting;
 #ifdef DEBUG
-            qDebug("SkyConnectImpl::updateAndSendEngineState: STOPPED -> ENGINE STARTING");
+            qDebug("SkyConnectImpl::updateAndSendEngineState: aircraft ID: %lld STOPPED -> ENGINE STARTING", objectId);
 #endif
         }
         break;
@@ -488,7 +488,7 @@ inline bool FS2020SimConnectPlugin::updateAndSendEngineStartEvent(qint64 objectI
             newEngineStateName = "Unknown";
             break;
         }
-        qDebug("SkyConnectImpl::updateAndSendEngineState: STATE UNKNOWN -> NEW ENGINE STATE: %s", qPrintable(newEngineStateName));
+        qDebug("SkyConnectImpl::updateAndSendEngineState: aircraft ID: %lld STATE UNKNOWN -> NEW ENGINE STATE: %s", objectId, qPrintable(newEngineStateName));
 #endif
         break;
     }
