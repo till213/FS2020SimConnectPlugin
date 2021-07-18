@@ -52,9 +52,10 @@ public:
 protected:
     virtual bool isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept override;
 
-    virtual bool onUserAircraftManualControl(bool enable) noexcept override;
+    virtual bool onUserAircraftManualControlEnabled(bool enable) noexcept override;
+    virtual bool onFlyWithFormationEnabled(bool enable) noexcept override;
 
-    virtual bool onStartRecording(const InitialPosition &initialPosition = InitialPosition::NullData) noexcept override;
+    virtual bool onStartRecording() noexcept override;
     virtual void onRecordingPaused(bool paused ) noexcept override;
     virtual void onStopRecording() noexcept override;
 
@@ -81,11 +82,11 @@ private:
 
     void frenchConnection() noexcept;
 
-    void resetCurrentData() noexcept;
+    void resetCurrentSampleData() noexcept;
     bool reconnectWithSim() noexcept;
     bool close() noexcept;
     void setupRequestData() noexcept;
-    bool setupInitialRecordingPosition(const InitialPosition &initialPosition) noexcept;
+    bool setupInitialRecordingPosition() noexcept;
     void setupInitialReplayPosition() noexcept;
     void setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept;
     bool sendAircraftData(TimeVariableData::Access access) noexcept;

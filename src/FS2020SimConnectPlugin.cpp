@@ -160,25 +160,30 @@ bool FS2020SimConnectPlugin::isTimerBasedRecording(SampleRate::SampleRate sample
     return sampleRate != SampleRate::SampleRate::Auto && sampleRate != SampleRate::SampleRate::Hz1;
 }
 
-bool FS2020SimConnectPlugin::onUserAircraftManualControl(bool enable) noexcept
+bool FS2020SimConnectPlugin::onUserAircraftManualControlEnabled(bool enable) noexcept
 {
-    // "Freeze" or "unfreeze" depending on whether the user aircraft is to be manually flown
+    // "Freeze" or "unfreeze" depending on whether the recorded user aircraft is to be manually flown
     setAircraftFrozen(::SIMCONNECT_OBJECT_ID_USER, !enable);
     return true;
 }
 
-bool FS2020SimConnectPlugin::onStartRecording(const InitialPosition &initialPosition) noexcept
+bool FS2020SimConnectPlugin::onFlyWithFormationEnabled(bool enable) noexcept
 {
-    resetCurrentData();
+    // "Freeze" or "unfreeze" depending on whether the user aircraft is to fly with the formation
+    setAircraftFrozen(::SIMCONNECT_OBJECT_ID_USER, !enable);
+    return updateAIObjects();
+}
 
+bool FS2020SimConnectPlugin::onStartRecording() noexcept
+{
+    resetCurrentSampleData();
     updateRecordingFrequency(Settings::getInstance().getRecordingSampleRate());
 
     // Initialise flight plan
     d->flightPlan.clear();
 
     HRESULT result;
-    // Setup initial position for user aircraft (if given)
-    bool ok = setupInitialRecordingPosition(initialPosition);
+    bool ok = setupInitialRecordingPosition();
     if (ok) {
         // Get aircraft information
         result = ::SimConnect_RequestDataOnSimObjectType(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataRequest::AircraftInfo), Enum::toUnderlyingType(SimConnectType::DataDefinition::FlightInformationDefinition), ::UserAirplaneRadiusMeters, SIMCONNECT_SIMOBJECT_TYPE_USER);
@@ -309,7 +314,7 @@ bool FS2020SimConnectPlugin::sendAircraftData(qint64 currentTimestamp, TimeVaria
 
         // Replay AI aircrafts - if any - during recording (if all aircrafts are selected for replay)
         const bool isUserAircraft = *aircraft == userAircraft;
-        if (isUserAircraft && isUserAircraftManualControl()) {
+        if (isUserAircraft && isUserAircraftManualControlEnabled()) {
             // The user aircraft is manually flown
             continue;
         }
@@ -522,7 +527,10 @@ bool FS2020SimConnectPlugin::connectWithSim() noexcept
 
 bool FS2020SimConnectPlugin::onCreateAIObjects() noexcept
 {
-    return d->simConnectAI->createSimulatedAircrafts(getCurrentFlight(), d->pendingAIAircraftCreationRequests);
+    // When "fly with formation" is enabled we also create an AI aircraft for the user aircraft
+    // (the user aircraft of the recorded aircrafts in the formation, that is)
+    const bool includingUserAircraft = isFlyWithFormationEnabled();
+    return d->simConnectAI->createSimulatedAircrafts(getCurrentFlight(), includingUserAircraft, d->pendingAIAircraftCreationRequests);
 }
 
 void FS2020SimConnectPlugin::onDestroyAIObjects() noexcept
@@ -597,7 +605,7 @@ void FS2020SimConnectPlugin::frenchConnection() noexcept
             this, &FS2020SimConnectPlugin::processSimConnectEvent);
 }
 
-void FS2020SimConnectPlugin::resetCurrentData() noexcept
+void FS2020SimConnectPlugin::resetCurrentSampleData() noexcept
 {
     d->currentPositionData = PositionData::NullData;
     d->currentEngineData = EngineData::NullData;
@@ -662,9 +670,10 @@ void FS2020SimConnectPlugin::setupRequestData() noexcept
 
 }
 
-bool FS2020SimConnectPlugin::setupInitialRecordingPosition(const InitialPosition &initialPosition) noexcept
+bool FS2020SimConnectPlugin::setupInitialRecordingPosition() noexcept
 {
     bool ok;
+    const InitialPosition &initialPosition = getInitialRecordingPosition();
     if (!initialPosition.isNull()) {
         // Set initial position
         SIMCONNECT_DATA_INITPOSITION initialSimConnectPosition = SimConnectPosition::toInitialPosition(initialPosition);
@@ -679,14 +688,27 @@ bool FS2020SimConnectPlugin::setupInitialRecordingPosition(const InitialPosition
 
 void FS2020SimConnectPlugin::setupInitialReplayPosition() noexcept
 {
+    bool initialPosition;
     const Aircraft &userAircraft = getCurrentFlight().getUserAircraftConst();
-    const PositionData &positionData = userAircraft.getPositionConst().getFirst();
-    const AircraftInfo aircraftInfo = userAircraft.getAircraftInfoConst();
-    if (!positionData.isNull()) {
-        // Set initial position
-        SIMCONNECT_DATA_INITPOSITION initialPosition = SimConnectPosition::toInitialPosition(positionData, aircraftInfo.startOnGround, aircraftInfo.initialAirspeed);
+    SIMCONNECT_DATA_INITPOSITION initialSimConnectPosition;
+    if (isFlyWithFormationEnabled()) {
+        initialSimConnectPosition = SimConnectPosition::toInitialPosition(getInitialReplayPosition());
+        initialPosition = true;
+    } else {
+        const PositionData &positionData = userAircraft.getPositionConst().getFirst();
+        // Make sure recorded position data exists
+        if (!positionData.isNull()) {
+            const AircraftInfo aircraftInfo = userAircraft.getAircraftInfoConst();
+            initialSimConnectPosition = SimConnectPosition::toInitialPosition(positionData, aircraftInfo.startOnGround, aircraftInfo.initialAirspeed);
+            initialPosition = true;
+        } else {
+            initialPosition = false;
+        }
+    }
+                // Set initial position
+    if (initialPosition) {
         ::SimConnect_SetDataOnSimObject(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftInitialPosition),
-                                        ::SIMCONNECT_OBJECT_ID_USER, ::SIMCONNECT_DATA_SET_FLAG_DEFAULT, 0, sizeof(::SIMCONNECT_DATA_INITPOSITION), &initialPosition);
+                                        ::SIMCONNECT_OBJECT_ID_USER, ::SIMCONNECT_DATA_SET_FLAG_DEFAULT, 0, sizeof(::SIMCONNECT_DATA_INITPOSITION), &initialSimConnectPosition);
     } else {
         stopReplay();
     }
@@ -695,8 +717,10 @@ void FS2020SimConnectPlugin::setupInitialReplayPosition() noexcept
 void FS2020SimConnectPlugin::setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept
 {
     DWORD data;
-    if (objectId == ::SIMCONNECT_OBJECT_ID_USER && isUserAircraftManualControl()) {
-        // The user aircraft is not to be frozen if manual flying is selected
+    if (objectId == ::SIMCONNECT_OBJECT_ID_USER &&
+        (isUserAircraftManualControlEnabled() || isFlyWithFormationEnabled())) {
+        // The user aircraft is not to be frozen if either "manual control" (of the recorded user aircraft)
+        // or "fly with formation" is enabled
         data = 0;
     } else {
         data = enable ? 1 : 0;
