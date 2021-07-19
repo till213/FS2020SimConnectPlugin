@@ -44,7 +44,7 @@ public:
     SimConnectAI(::HANDLE simConnectHandle);
     ~SimConnectAI();
 
-    bool createSimulatedAircrafts(Flight &flight, bool includingUserAircraft, std::unordered_map<::SIMCONNECT_DATA_REQUEST_ID, Aircraft *> &pendingAIAircraftCreationRequests) noexcept;
+    bool createSimulatedAircrafts(Flight &flight, qint64 timestamp, bool includingUserAircraft, std::unordered_map<::SIMCONNECT_DATA_REQUEST_ID, Aircraft *> &pendingAIAircraftCreationRequests) noexcept;
     void destroySimulatedAircrafts(Flight &flight) noexcept;
     void destroySimulatedAircraft(Aircraft &aircraft) noexcept;
     void destroySimulatedObject(qint64 objectId) noexcept;

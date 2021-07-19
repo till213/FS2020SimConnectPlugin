@@ -67,7 +67,7 @@ SimConnectAI::~SimConnectAI()
 #endif
 }
 
-bool SimConnectAI::createSimulatedAircrafts(Flight &flight, bool includingUserAircraft, std::unordered_map<::SIMCONNECT_DATA_REQUEST_ID, Aircraft *> &pendingAIAircraftCreationRequests) noexcept
+bool SimConnectAI::createSimulatedAircrafts(Flight &flight, qint64 timestamp, bool includingUserAircraft, std::unordered_map<::SIMCONNECT_DATA_REQUEST_ID, Aircraft *> &pendingAIAircraftCreationRequests) noexcept
 {
     HRESULT result;
     bool ok;
@@ -86,8 +86,10 @@ bool SimConnectAI::createSimulatedAircrafts(Flight &flight, bool includingUserAi
         } else if (aircraft->getSimulationObjectId() == Aircraft::InvalidSimulationId) {
             pendingAIAircraftCreationRequests[requestId] = aircraft.get();
             const AircraftInfo aircraftInfo = aircraft->getAircraftInfoConst();
-            initialPosition = SimConnectPosition::toInitialPosition(aircraft->getPositionConst().getFirst(), aircraftInfo.startOnGround, aircraftInfo.initialAirspeed);
-            result = ::SimConnect_AICreateNonATCAircraft(d->simConnectHandle, aircraftInfo.aircraftType.type.toLatin1(), aircraftInfo.tailNumber.toLatin1(), initialPosition, requestId);
+            const Position &position = aircraft->getPositionConst();
+            const PositionData positioNData = position.interpolate(timestamp, TimeVariableData::Access::Seek);
+            initialPosition = SimConnectPosition::toInitialPosition(positioNData, aircraftInfo.startOnGround, aircraftInfo.initialAirspeed);
+            result = ::SimConnect_AICreateNonATCAircraft(d->simConnectHandle, aircraftInfo.aircraftType.type.toLocal8Bit(), aircraftInfo.tailNumber.toLocal8Bit(), initialPosition, requestId);
             ok = result == S_OK;
             if (ok) {
                 aircraft->setSimulationObjectId(Aircraft::PendingSimulationId);

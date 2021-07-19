@@ -52,8 +52,8 @@ public:
 protected:
     virtual bool isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept override;
 
-    virtual bool onUserAircraftManualControlEnabled(bool enable) noexcept override;
-    virtual bool onFlyWithFormationEnabled(bool enable) noexcept override;
+    virtual bool onInitialPositionSetup(const InitialPosition &initialPosition) noexcept override;
+    virtual bool onFreezeUserAircraft(bool enable) noexcept override;
 
     virtual bool onStartRecording() noexcept override;
     virtual void onRecordingPaused(bool paused ) noexcept override;
@@ -87,14 +87,12 @@ private:
     bool close() noexcept;
     void setupRequestData() noexcept;
     bool setupInitialRecordingPosition() noexcept;
-    void setupInitialReplayPosition() noexcept;
-    void setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept;
+    bool setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept;
     bool sendAircraftData(TimeVariableData::Access access) noexcept;
     inline bool updateAndSendEngineStartEvent(qint64 objectId, const EngineData &engineData, TimeVariableData::Access access) noexcept;
     void replay() noexcept;
     void updateRecordingFrequency(SampleRate::SampleRate sampleRate) noexcept;
     void updateRequestPeriod(::SIMCONNECT_PERIOD period) noexcept;
-
 
     static void CALLBACK dispatch(::SIMCONNECT_RECV *receivedData, DWORD cbData, void *context) noexcept;
 
