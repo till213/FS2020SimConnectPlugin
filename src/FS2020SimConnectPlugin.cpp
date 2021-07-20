@@ -152,6 +152,16 @@ FS2020SimConnectPlugin::~FS2020SimConnectPlugin() noexcept
 #endif
 }
 
+bool FS2020SimConnectPlugin::setUserAircraftPosition(const PositionData &positionData) noexcept
+{
+    SimConnectPosition simConnnectPosition;
+    simConnnectPosition.fromPositionData(positionData);
+    const HRESULT res = ::SimConnect_SetDataOnSimObject(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftPositionDefinition),
+                                                        ::SIMCONNECT_OBJECT_ID_USER, ::SIMCONNECT_DATA_SET_FLAG_DEFAULT, 0,
+                                                        sizeof(SimConnectPosition), &simConnnectPosition);
+    return res == S_OK;
+}
+
 // PROTECTED
 
 bool FS2020SimConnectPlugin::isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept

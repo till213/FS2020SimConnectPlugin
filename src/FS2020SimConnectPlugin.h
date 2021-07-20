@@ -49,6 +49,8 @@ public:
     FS2020SimConnectPlugin(QObject *parent = nullptr) noexcept;
     virtual ~FS2020SimConnectPlugin() noexcept;
 
+    virtual bool setUserAircraftPosition(const PositionData &positionData) noexcept override;
+
 protected:
     virtual bool isTimerBasedRecording(SampleRate::SampleRate sampleRate) const noexcept override;
 
