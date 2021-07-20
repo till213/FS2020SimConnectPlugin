@@ -183,13 +183,9 @@ bool FS2020SimConnectPlugin::onStartRecording() noexcept
     // Initialise flight plan
     d->flightPlan.clear();
 
-    HRESULT result;
-    bool ok = setupInitialRecordingPosition();
-    if (ok) {
-        // Get aircraft information
-        result = ::SimConnect_RequestDataOnSimObjectType(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataRequest::AircraftInfo), Enum::toUnderlyingType(SimConnectType::DataDefinition::FlightInformationDefinition), ::UserAirplaneRadiusMeters, SIMCONNECT_SIMOBJECT_TYPE_USER);
-        ok = result == S_OK;
-    }
+    // Get aircraft information
+    HRESULT result = ::SimConnect_RequestDataOnSimObjectType(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataRequest::AircraftInfo), Enum::toUnderlyingType(SimConnectType::DataDefinition::FlightInformationDefinition), ::UserAirplaneRadiusMeters, SIMCONNECT_SIMOBJECT_TYPE_USER);
+    bool ok = result == S_OK;
 
     // Send AI aircraft positions every visual frame
     if (ok) {
@@ -232,7 +228,7 @@ void FS2020SimConnectPlugin::onStopRecording() noexcept
     } else if (waypointCount == 0 && userAircraft.getPositionConst().count() > 0) {
         Waypoint departureWaypoint;
         PositionData position = userAircraft.getPositionConst().getFirst();
-        departureWaypoint.identifier = "CUSTD";
+        departureWaypoint.identifier = Waypoint::CustomDepartureIdentifier;
         departureWaypoint.latitude = position.latitude;
         departureWaypoint.longitude = position.longitude;
         departureWaypoint.altitude = position.altitude;
@@ -243,7 +239,7 @@ void FS2020SimConnectPlugin::onStopRecording() noexcept
 
         Waypoint arrivalWaypoint;
         position = userAircraft.getPositionConst().getLast();
-        arrivalWaypoint.identifier = "CUSTA";
+        arrivalWaypoint.identifier = Waypoint::CustomArrivalIdentifier;
         arrivalWaypoint.latitude = position.latitude;
         arrivalWaypoint.longitude = position.longitude;
         arrivalWaypoint.altitude = position.altitude;
@@ -656,22 +652,6 @@ void FS2020SimConnectPlugin::setupRequestData() noexcept
     ::SimConnect_MapClientEventToSimEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::EngineAutoStart), "ENGINE_AUTO_START");
     ::SimConnect_MapClientEventToSimEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::EngineAutoShutdown), "ENGINE_AUTO_SHUTDOWN");
 
-}
-
-bool FS2020SimConnectPlugin::setupInitialRecordingPosition() noexcept
-{
-    bool ok;
-    const InitialPosition &initialPosition = getInitialRecordingPosition();
-    if (!initialPosition.isNull()) {
-        // Set initial position
-        SIMCONNECT_DATA_INITPOSITION initialSimConnectPosition = SimConnectPosition::toInitialPosition(initialPosition);
-        HRESULT result = ::SimConnect_SetDataOnSimObject(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftInitialPosition),
-                                                         ::SIMCONNECT_OBJECT_ID_USER, ::SIMCONNECT_DATA_SET_FLAG_DEFAULT, 0, sizeof(::SIMCONNECT_DATA_INITPOSITION), &initialSimConnectPosition);
-        ok = result == S_OK;
-    } else {
-        ok = true;
-    }
-    return ok;
 }
 
 bool FS2020SimConnectPlugin::setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept

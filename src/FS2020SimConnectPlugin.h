@@ -86,7 +86,6 @@ private:
     bool reconnectWithSim() noexcept;
     bool close() noexcept;
     void setupRequestData() noexcept;
-    bool setupInitialRecordingPosition() noexcept;
     bool setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept;
     bool sendAircraftData(TimeVariableData::Access access) noexcept;
     inline bool updateAndSendEngineStartEvent(qint64 objectId, const EngineData &engineData, TimeVariableData::Access access) noexcept;
