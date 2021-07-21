@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectSimulationTime.h"
 
+// PUBLIC
+
 void SimConnectSimulationTime::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::SimulationTimeDefinition), SimVar::LocalTime, "seconds", SIMCONNECT_DATATYPE_INT32);

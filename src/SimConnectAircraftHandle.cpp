@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectAircraftHandle.h"
 
+// PUBLIC
+
 void SimConnectAircraftHandle::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     // // Gear, brakes & handles

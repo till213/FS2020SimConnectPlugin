@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectLight.h"
 
+// PUBLIC
+
 void SimConnectLight::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     // Lights

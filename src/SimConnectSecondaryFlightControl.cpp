@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectSecondaryFlightControl.h"
 
+// PUBLIC
+
 void SimConnectSecondaryFlightControl::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftSecondaryFlightControlDefinition), SimVar::LeadingEdgeFlapsLeftPercent, "Percent", ::SIMCONNECT_DATATYPE_FLOAT32);

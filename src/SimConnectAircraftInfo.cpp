@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectAircraftInfo.h"
 
+// PUBLIC
+
 void SimConnectAircraftInfo::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     // Aircraft info

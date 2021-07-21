@@ -176,7 +176,6 @@ bool FS2020SimConnectPlugin::onInitialPositionSetup(const InitialPosition &initi
     SIMCONNECT_DATA_INITPOSITION initialSimConnectPosition = SimConnectPosition::toInitialPosition(initialPosition);
     result = ::SimConnect_SetDataOnSimObject(d->simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftInitialPosition),
                                              ::SIMCONNECT_OBJECT_ID_USER, ::SIMCONNECT_DATA_SET_FLAG_DEFAULT, 0, sizeof(::SIMCONNECT_DATA_INITPOSITION), &initialSimConnectPosition);
-
     return result == S_OK;
 }
 
@@ -661,7 +660,6 @@ void FS2020SimConnectPlugin::setupRequestData() noexcept
 
     ::SimConnect_MapClientEventToSimEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::EngineAutoStart), "ENGINE_AUTO_START");
     ::SimConnect_MapClientEventToSimEvent(d->simConnectHandle, Enum::toUnderlyingType(Event::EngineAutoShutdown), "ENGINE_AUTO_SHUTDOWN");
-
 }
 
 bool FS2020SimConnectPlugin::setAircraftFrozen(::SIMCONNECT_OBJECT_ID objectId, bool enable) noexcept
