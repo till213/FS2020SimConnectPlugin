@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectPrimaryFlightControl.h"
 
+// PUBLIC
+
 void SimConnectPrimaryFlightControl::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftPrimaryFlightControlDefinition), SimVar::RudderPosition, "Position", ::SIMCONNECT_DATATYPE_FLOAT32);

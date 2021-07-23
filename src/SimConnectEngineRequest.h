@@ -26,6 +26,7 @@
 #define SIMCONNECTENGINEREQUEST_H
 
 #include <windows.h>
+#include <SimConnect.h>
 
 #include "../../../../../Kernel/src/SkyMath.h"
 #include "../../../../../Model/src/SimType.h"
@@ -93,6 +94,9 @@ struct SimConnectEngineRequest
     }
 
     static void addToDataDefinition(HANDLE simConnectHandle) noexcept;
+
+protected:
+    static void addToDataDefinition(HANDLE simConnectHandle, ::SIMCONNECT_DATA_DEFINITION_ID dataDefinitionId) noexcept;
 };
 #pragma pack(pop)
 

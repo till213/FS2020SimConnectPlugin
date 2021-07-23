@@ -31,6 +31,8 @@
 #include "SimConnectType.h"
 #include "SimConnectFlightPlan.h"
 
+// PUBLIC
+
 void SimConnectFlightPlan::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::FlightPlanDefinition), SimVar::GpsWPNextId, nullptr, ::SIMCONNECT_DATATYPE_STRING8);
