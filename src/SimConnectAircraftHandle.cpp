@@ -33,7 +33,7 @@
 
 void SimConnectAircraftHandle::addToDataDefinition(HANDLE simConnectHandle) noexcept
 {
-    // // Gear, brakes & handles
+    // Gear, brakes & handles
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::BrakeLeftPosition, "Position", ::SIMCONNECT_DATATYPE_FLOAT32);
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::BrakeRightPosition, "Position", ::SIMCONNECT_DATATYPE_FLOAT32);
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::WaterRudderHandlePosition, "Position", ::SIMCONNECT_DATATYPE_FLOAT32);
@@ -42,4 +42,5 @@ void SimConnectAircraftHandle::addToDataDefinition(HANDLE simConnectHandle) noex
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::FoldingWingLeftPercent, "Percent", ::SIMCONNECT_DATATYPE_FLOAT32);
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::FoldingWingRightPercent, "Percent", ::SIMCONNECT_DATATYPE_FLOAT32);
     ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::GearHandlePosition, "Bool", ::SIMCONNECT_DATATYPE_INT32);
+    ::SimConnect_AddToDataDefinition(simConnectHandle, Enum::toUnderlyingType(SimConnectType::DataDefinition::AircraftHandleDefinition), SimVar::SmokeEnable, "Bool", ::SIMCONNECT_DATATYPE_INT32);
 }

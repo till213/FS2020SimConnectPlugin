@@ -48,6 +48,7 @@ struct SimConnectAircraftHandle
     float foldingWingLeftPercent;
     float foldingWingRightPercent;
     qint32 gearHandlePosition;
+    qint32 smokeEnable;
 
     inline AircraftHandleData toAircraftHandleData() const noexcept
     {
@@ -61,6 +62,7 @@ struct SimConnectAircraftHandle
         aircraftHandleData.leftWingFolding = SkyMath::fromPercent(foldingWingLeftPercent);
         aircraftHandleData.rightWingFolding = SkyMath::fromPercent(foldingWingRightPercent);
         aircraftHandleData.gearHandlePosition = gearHandlePosition != 0;
+        aircraftHandleData.smokeEnabled = smokeEnable != 0;
 
         return aircraftHandleData;
     }
@@ -75,6 +77,7 @@ struct SimConnectAircraftHandle
         foldingWingLeftPercent = SkyMath::toPercent(aircraftHandleData.leftWingFolding);
         foldingWingRightPercent = SkyMath::toPercent(aircraftHandleData.rightWingFolding);
         gearHandlePosition = aircraftHandleData.gearHandlePosition ? 1 : 0;
+        smokeEnable = aircraftHandleData.smokeEnabled ? 1 : 0;
     }
 
     static void addToDataDefinition(HANDLE simConnectHandle) noexcept;
