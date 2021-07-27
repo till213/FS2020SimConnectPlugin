@@ -1,20 +1,19 @@
-set(PLUGIN_NAME "FS2020SimConnectPlugin")
+set(LIBRARY_NAME "FS2020SimConnectPlugin")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_library(${PLUGIN_NAME} SHARED
-        ${PLUGIN_SOURCES}
-    )
+    qt_add_library(${LIBRARY_NAME} SHARED "")
 else()
-    add_library(${PLUGIN_NAME} SHARED
-        ${PLUGIN_SOURCES}
-    )
+    add_library(${LIBRARY_NAME} SHARED "")
 endif()
 
-# SimConnect
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdParty/cmake")
-find_package(SimConnect REQUIRED)
+set(LIBRARY_DEPENDENCIES
+    Qt${QT_VERSION_MAJOR}::Widgets Kernel Model SkyConnect tsl::ordered_map SimConnect
+)
+if (${PLATFORM_IS_MACOS})
+    list(APPEND LIBRARY_DEPENDENCIES -lc++)
+endif()
 
-target_sources(${PLUGIN_NAME}
+target_sources(${LIBRARY_NAME}
     PRIVATE
         src/FS2020SimConnectPlugin.cpp
         src/FS2020SimConnectPlugin.h
@@ -44,20 +43,16 @@ target_sources(${PLUGIN_NAME}
         src/SimConnectAI.h
         src/EventWidget.cpp
         src/EventWidget.h
-    )
+)
+
+target_link_libraries(${LIBRARY_NAME} PRIVATE ${LIBRARY_DEPENDENCIES})
+
+# SimConnect
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdParty/cmake")
+find_package(SimConnect REQUIRED)
 
 # Copy SimConnect.dll to bin directory (for development)
-add_custom_command(TARGET ${PLUGIN_NAME} POST_BUILD
+add_custom_command(TARGET ${LIBRARY_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:SimConnect>
-        $<TARGET_FILE_DIR:${PLUGIN_NAME}>/../../)
-
-set(PLUGIN_DEPENDENCIES
-    Qt${QT_VERSION_MAJOR}::Widgets Kernel Model SkyConnect tsl::ordered_map SimConnect
-)
-
-target_link_libraries(${PLUGIN_NAME} PRIVATE ${PLUGIN_DEPENDENCIES})
-
-target_include_directories(${PLUGIN_NAME} PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}"
-)
+        $<TARGET_FILE_DIR:${LIBRARY_NAME}>/../../)
