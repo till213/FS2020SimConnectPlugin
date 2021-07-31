@@ -123,7 +123,7 @@ struct SimConnectPosition
         initialSimConnnectPosition.Bank = initialPosition.bank;
         initialSimConnnectPosition.Heading = initialPosition.heading;
         initialSimConnnectPosition.OnGround = initialPosition.onGround ? 1 : 0;
-        initialSimConnnectPosition.Airspeed = initialPosition.airspeed;
+        initialSimConnnectPosition.Airspeed = initialPosition.indicatedAirspeed;
 
         return initialSimConnnectPosition;
     }
